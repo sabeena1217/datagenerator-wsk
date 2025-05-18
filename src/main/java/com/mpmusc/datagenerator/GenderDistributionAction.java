@@ -16,8 +16,13 @@ public class GenderDistributionAction {
         JsonObject response = new JsonObject();
 
         try {
+            long startTime = System.currentTimeMillis(); // ⏱ Start timer
+
             String filename = input.has("filename") ? input.get("filename").getAsString() : "fake_employees_100k.csv";
             Map<String, Map<String, Double>> result = analyzeGenderDistribution(filename);
+
+            long endTime = System.currentTimeMillis(); // ⏱ End timer
+            long elapsedTime = endTime - startTime;
 
             JsonObject dist = new JsonObject();
             for (Map.Entry<String, Map<String, Double>> dept : result.entrySet()) {
@@ -29,6 +34,7 @@ public class GenderDistributionAction {
             }
 
             response.add("distribution", dist);
+            response.addProperty("executionTimeMillis", elapsedTime); // ⏱ Add to response
         } catch (Exception e) {
             response.addProperty("error", "Failed to process file: " + e.getMessage());
         }
@@ -83,11 +89,17 @@ public class GenderDistributionAction {
     }
 
     private static void simulateProcessingDelay() {
-        for (int i = 0; i < 10000; i++) {
+        for (int i = 0; i < 100; i++) {
             double temp = Math.sqrt(i) * Math.pow(i, 0.5);
         }
     }
-    // mvn clean package
     // to generate the jar file
+    // mvn clean package
 
+    // to create the action
+    // wsk --insecure action create genderDistributionJavaWithDelay target/datagenerator-wsk-1.0-SNAPSHOT.jar --main com.mpmusc.datagenerator.GenderDistributionAction
+
+    // to invoke the action
+    // wsk -i action invoke /whisk.system/genderDistributionJavaWithDelay -r
+    // wsk -i action invoke genderDistributionJavaWithDelay -r
 }
